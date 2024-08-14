@@ -8,6 +8,7 @@ create a venv and install requirements.txt
 copy dashStarter to the desktop
 
 BOM:
+
 Use the Pi LCD
 https://www.raspberrypi.com/products/raspberry-pi-touch-display/
 
