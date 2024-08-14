@@ -48,9 +48,9 @@ def animate(i, xs, ys, zs):
     zs.append(temp_d)
 
     # Limit x and y lists to 20 items
-    xs = xs[-30:]
-    ys = ys[-30:]
-    zs = zs[-30:]
+    xs = xs[-50:]
+    ys = ys[-50:]
+    zs = zs[-50:]
 
     xlist = [xs, xs]
     ylist = [ys, zs]
@@ -72,8 +72,8 @@ def animate(i, xs, ys, zs):
     plt.xticks(rotation=45, ha='right')
     plt.grid(True)
     plt.subplots_adjust(left=0.1, bottom=0.1, right=1, top=0.95)
-    plt.title('Exhaust Temperatures')
-    plt.ylabel('Temperature degree C')
+    plt.title('Sound Intensity')
+    plt.ylabel('dBA')
 
 # Set up plot to call animate() function periodically
 ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys, zs), interval=100, cache_frame_data=False)
