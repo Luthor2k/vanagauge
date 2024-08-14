@@ -7,6 +7,10 @@ create a venv and install requirements.txt
 
 copy dashStarter to the desktop
 
+The lastest version of Raspbian is using Wayland instead of X. To hide the cursor:
+
+https://raspberrypi.stackexchange.com/questions/145382/remove-hide-mouse-cursor-when-idle-on-rasbperry-pi-os-bookworm
+
 BOM:
 
 Use the Pi LCD
