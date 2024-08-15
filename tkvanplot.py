@@ -86,4 +86,5 @@ def animate(i, xs, ys, zs):
 
 # Set up plot to call animate() function periodically
 ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys, zs), interval=500, cache_frame_data=False)
+set_cursor(cursor)
 plt.show()

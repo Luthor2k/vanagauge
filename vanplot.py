@@ -4,6 +4,8 @@ from tkinter import *
 from tkinter import ttk
 import sv_ttk
 
+import curses 
+
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.ticker as ticker
@@ -14,6 +16,10 @@ import time
 #import threading
 #import wensn
 import numpy as np
+
+#hide the cursor
+#stdscr = curses.initscr() 
+#curses.curs_set(0)  
 
 # Create figure for plotting
 plt.rcParams['toolbar'] = 'None'
