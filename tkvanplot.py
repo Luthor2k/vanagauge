@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 
 from tkinter import * 
 from tkinter import ttk
@@ -10,10 +11,10 @@ import matplotlib.ticker as ticker
 #import tmp102
 import random
 import time
-#import techedge
 #import threading
 #import wensn
 import numpy as np
+import techedgemodule
 
 # Create figure for plotting
 plt.rcParams['toolbar'] = 'None'
@@ -33,23 +34,31 @@ zs = []
 
 start_time = time.time()
 
-temp_c = 500
-temp_d = 500
+ADC1 = 500
+ADC2 = 500
 
 # This function is called periodically from FuncAnimation
 def animate(i, xs, ys, zs):
-    global temp_c
-    global temp_d
+    global ADC1
+    global ADC2
 
     # Read temperature (Celsius) from TMP102
-    temp_c = temp_c + random.randint(-10, 10)
-    temp_d = temp_d + random.randint(-10, 10)
+    ADC1 = ADC1 + random.randint(-10, 10)
+    ADC2 = ADC2 + random.randint(-10, 10)
+
+    ADC1 = techedgemodule.readADC(DAQ, 1) * 200 #adc1: 4.999 = 100%
+    ADC2 = techedgemodule.readADC(DAQ, 2) * 72 #adc2: 4.150390625 = 30PSI
+
+    logging.info(f"ADC1: {ADC1}")
+    logging.info(f"ADC2: {ADC2}")
+    
+
 
     # Add x and y to lists
     time_since_start = time.time() - start_time
     xs.append(time_since_start)
-    ys.append(temp_c)
-    zs.append(temp_d)
+    ys.append(ADC1)
+    zs.append(ADC2)
 
     # Limit x and y lists to 20 items
     xs = xs[-50:]
@@ -84,7 +93,14 @@ def animate(i, xs, ys, zs):
     plt.title('Exhaust Temperatures')
     plt.ylabel('Temperature degree C')
 
-# Set up plot to call animate() function periodically
-ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys, zs), interval=500, cache_frame_data=False)
-set_cursor(cursor)
-plt.show()
+if __name__ == '__main__':
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)
+
+    # Set up plot to call animate() function periodically
+    ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys, zs), interval=500, cache_frame_data=False)
+    #set_cursor(cursor)
+
+    DAQ = techedgemodule.init('/dev/ttyUSB0')
+
+    plt.show()

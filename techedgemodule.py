@@ -51,7 +51,22 @@ class SerialReaderProtocolLine(LineReader):
     TERMINATOR = b'\x5a\xa5' #tech edge
 
     var_listener = None
+
+    sequence_counter = None
+
+    DAQRawLambda16 = None
+
+    DAQRawUser1 = None
+    DAQRawUser2 = None
+    DAQRawUser3 = None
+
     DAQRawThermocouple1 = None
+    DAQRawThermocouple2 = None
+    DAQRawThermocouple3 = None
+
+    DAQRawOnboardThermistor = None
+
+    DAQRawRPMCount = None
 
     #def __init__(self):
     #    self.DAQRawThermocouple1 = 0
@@ -71,33 +86,72 @@ class SerialReaderProtocolLine(LineReader):
         #check checksum
 
         #parse the frame
-        sequence_counter = line[0]
-        logging.info(f"sequence_counter: {sequence_counter}")
+        self.sequence_counter = line[0]
+        logging.info(f"sequence_counter: {self.sequence_counter}")
 
-        DAQRawLambda16 = (int(line[3]) * 256) + int(line[4])
-        logging.info(f"sequence_counter: {sequence_counter}")
+        self.DAQRawLambda16 = (int(line[3]) * 256) + int(line[4])
+        logging.info(f"sequence_counter: {self.sequence_counter}")
 
-        DAQRawUser1 = (int(line[7]) * 256) + int(line[8])      #boost pressure
-        DAQRawUser2 = (int(line[9]) * 256) + int(line[10])    #throttle position
-        DAQRawUser3 = (int(line[11]) * 256) + int(line[12])    #intake temperature
-        logging.info(f"DAQRawUser1: {DAQRawUser1}")
-        logging.info(f"DAQRawUser2: {DAQRawUser2}")
-        logging.info(f"DAQRawUser3: {DAQRawUser3}")
+        self.DAQRawUser1 = (int(line[7]) * 256) + int(line[8])      #boost pressure
+        self.DAQRawUser2 = (int(line[9]) * 256) + int(line[10])    #throttle position
+        self.DAQRawUser3 = (int(line[11]) * 256) + int(line[12])    #intake temperature
+        logging.info(f"DAQRawUser1: {self.DAQRawUser1}")
+        logging.info(f"DAQRawUser2: {self.DAQRawUser2}")
+        logging.info(f"DAQRawUser3: {self.DAQRawUser3}")
 
         self.DAQRawThermocouple1 = (int(line[13]) * 256) + int(line[14])  #egt, needs correcting curve to be applied
-        DAQRawThermocouple2 = (int(line[15]) * 256) + int(line[16])  #oil temp
-        DAQRawThermocouple3 = (int(line[17]) * 256) + int(line[18])  #turbo temp
+        self.DAQRawThermocouple2 = (int(line[15]) * 256) + int(line[16])  #oil temp
+        self.DAQRawThermocouple3 = (int(line[17]) * 256) + int(line[18])  #turbo temp
         logging.info(f"DAQRawThermocouple1: {self.DAQRawThermocouple1}")
-        logging.info(f"DAQRawThermocouple2: {DAQRawThermocouple2}")
-        logging.info(f"DAQRawThermocouple3: {DAQRawThermocouple3}")
+        logging.info(f"DAQRawThermocouple2: {self.DAQRawThermocouple2}")
+        logging.info(f"DAQRawThermocouple3: {self.DAQRawThermocouple3}")
 
-        DAQRawOnboardThermistor = (int(line[19]) * 256) + int(line[20])
-        DAQRawRPMCount = (int(line[21]) * 256) + int(line[22])
-        logging.info(f"DAQRawOnboardThermistor: {DAQRawOnboardThermistor}")
-        logging.info(f"DAQRawRPMCount: {DAQRawRPMCount}")
+        self.DAQRawOnboardThermistor = (int(line[19]) * 256) + int(line[20])
+        self.DAQRawRPMCount = (int(line[21]) * 256) + int(line[22])
+        logging.info(f"DAQRawOnboardThermistor: {self.DAQRawOnboardThermistor}")
+        logging.info(f"DAQRawRPMCount: {self.DAQRawRPMCount}")
 
         #DAQRawSensorState = byte(line[24]) & byte(0x07);  #wideband pump cell pid state bits
         #DAQRawHeaterState = byte(line[25]) & byte(0x07);  #wideband heater pid state bits
+
+
+def init(ser):
+    serial_port = Serial(ser, 19200, timeout=1)
+    reader = ReaderThread(serial_port, SerialReaderProtocolLine)
+    reader.start()
+    transport, protocol = reader.connect()
+    return protocol
+
+
+def getReadings(protocol):
+    return protocol.DAQRawThermocouple2
+
+def readTC(protocol, channel, table): #channel, reference table
+    return
+
+def readADC(protocol, channel): #returns zero to five volts as a float
+    match channel:
+        case 1:
+            rawADC = protocol.DAQRawUser1
+        case 2:
+            rawADC = protocol.DAQRawUser2
+        case 3:
+            rawADC = protocol.DAQRawUser3
+    if rawADC == None:
+        rawADC = 0
+    scaledADC = rawADC / 1638.4
+    return scaledADC
+
+def readLambda():
+    return
+def readThermistor():
+    return
+def readRPM():
+    return
+def readStatus():
+    return
+def readCounter():
+    return
 
 if __name__ == '__main__':
     logger = logging.getLogger()
@@ -108,9 +162,10 @@ if __name__ == '__main__':
     serial_port = Serial('/dev/ttyUSB0', 19200, timeout=1)
     reader = ReaderThread(serial_port, SerialReaderProtocolLine)
     reader.start()
+    #Wait until connection is set up and return the transport and protocol instances.
+    transport, protocol = reader.connect()
 
     while True:
         logging.warning("tick")
-        print(reader.DAQRawThermocouple1)
-
+        print(protocol.DAQRawThermocouple1)
         time.sleep(1)
