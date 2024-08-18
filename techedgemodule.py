@@ -111,6 +111,6 @@ if __name__ == '__main__':
 
     while True:
         logging.warning("tick")
-        print(reader.SerialReaderProtocolLine.DAQRawThermocouple1)
+        print(reader.DAQRawThermocouple1)
 
         time.sleep(1)
