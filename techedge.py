@@ -54,8 +54,8 @@ def lookupReference(rawValue, rawMax, lookupTable):
 
     return scaledValue
 
-def getDAQ():
-    ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)  # open serial port
+def init(ser):
+    #ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)  # open serial port
     print(ser.name)         # check which port was really used
 
     techedgeActive = True
@@ -144,3 +144,7 @@ def getDAQ():
             print("\n")
 
     ser.close()             # close port
+
+def readCounter():
+    
+    return sequence_counter
