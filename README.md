@@ -7,7 +7,11 @@ create a venv and install requirements.txt
 ```
 cd vanagauge && python -m venv env && source env/bin/activate && pip install -r requirements.txt
 ```
-
+Raspbian has moved to Wayfire from X, add to ~/.config/wayfire.ini:
+```
+[autostart]
+dashtaskid = $HOME/vanagauge/dashServiceStart.sh
+```
 
 copy dashStarter to the desktop
 
