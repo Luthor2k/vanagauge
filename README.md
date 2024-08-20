@@ -4,6 +4,10 @@ Dash gauge for visualizing data from a Tech Edge wideband DAQ.
 
 Setup:
 create a venv and install requirements.txt
+```
+cd vanagauge && python -m venv env && source env/bin/activate && pip install -r requirements.txt
+```
+
 
 copy dashStarter to the desktop
 
