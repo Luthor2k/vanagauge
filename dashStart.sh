@@ -1,8 +1,7 @@
 #!/bin/sh
-export PATH="/home/arthur/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export DISPLAY=:0
 
-. ./env/bin/activate
+. $HOME/vanagauge/env/bin/activate
 
-python3 /home/arthur/vanagauge/vanplot.py
-
-sleep 1
+python3 $HOME/vanagauge/vanplot.py

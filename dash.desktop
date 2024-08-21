@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Comment=start dash
+Terminal=false
+Name=DashPathless
+Exec=/bin/sh -c "$HOME/vanagauge/dashStart.sh"
+Icon=utilities-system-monitor
+StartupNotify=false
