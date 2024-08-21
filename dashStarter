@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=VanDash
-Comment=VanDash
-Icon=/home/pi/dbeaver/icon.xpm
-Exec=/home/arthur/gaugedemo/dashStart.sh
-Type=Application
-Encoding=UTF-8
-Terminal=false
-Categories=None;
