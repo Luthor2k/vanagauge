@@ -12,8 +12,11 @@ Raspbian has moved to Wayfire from X, add to ~/.config/wayfire.ini:
 [autostart]
 dashtaskid = $HOME/vanagauge/dashServiceStart.sh
 ```
-
-copy dashStarter to the desktop
+Graceful shutdown on pin toggle:
+```
+sudo cp shutdownPin17.service /etc/systemd/system/shutdownPin17.service
+sudo systemctl enable shutdownPin17.service && sudo systemctl daemon-reload && sudo systemctl start shutdownPin17.service
+```
 
 The lastest version of Raspbian is using Wayland instead of X. To hide the cursor:
 
