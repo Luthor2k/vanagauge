@@ -1,0 +1,8 @@
+[Unit]
+Description=shutsdown on pin 17 going low
+
+[Service]
+ExecStart=/home/arthur/shutdowner/safe_shutdown_interrupt_Pi.py
+
+[Install]
+WantedBy=default.target
