@@ -5,7 +5,7 @@ import time
 print("hello")
 
 
-DAQ = techedgemodule.init('/dev/ttyUSB0')
+DAQ = techedgemodule.init('/dev/ttyS0')
 
 while True:
     logging.warning("tick")

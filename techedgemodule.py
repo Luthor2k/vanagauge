@@ -126,8 +126,20 @@ def init(ser):
 def getReadings(protocol):
     return protocol.DAQRawThermocouple2
 
-def readTC(protocol, channel, table): #channel, reference table
-    return
+def readTC(protocol, channel): #channel, reference table
+    match channel:
+        case 1:
+            rawADC = protocol.DAQRawThermocouple1
+        case 2:
+            rawADC = protocol.DAQRawThermocouple2
+        case 3:
+            rawADC = protocol.DAQRawThermocouple3
+    if rawADC == None:
+        rawADC = 0
+    scaledADC = rawADC / 50
+
+    
+    return scaledADC
 
 def readADC(protocol, channel): #returns zero to five volts as a float
     match channel:

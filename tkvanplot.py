@@ -40,11 +40,7 @@ ADC2 = 500
 # This function is called periodically from FuncAnimation
 def animate(i, xs, ys, zs):
     global ADC1
-    global ADC2
-
-    # Read temperature (Celsius) from TMP102
-    ADC1 = ADC1 + random.randint(-10, 10)
-    ADC2 = ADC2 + random.randint(-10, 10)
+    global ADC2, ADC3
 
     ADC1 = techedgemodule.readADC(DAQ, 1) * 200 #adc1: 4.999 = 100%
     ADC2 = techedgemodule.readADC(DAQ, 2) * 72 #adc2: 4.150390625 = 30PSI
@@ -52,8 +48,6 @@ def animate(i, xs, ys, zs):
     logging.info(f"ADC1: {ADC1}")
     logging.info(f"ADC2: {ADC2}")
     
-
-
     # Add x and y to lists
     time_since_start = time.time() - start_time
     xs.append(time_since_start)
@@ -101,6 +95,6 @@ if __name__ == '__main__':
     ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys, zs), interval=500, cache_frame_data=False)
     #set_cursor(cursor)
 
-    DAQ = techedgemodule.init('/dev/ttyUSB0')
+    DAQ = techedgemodule.init('/dev/ttyS0')
 
     plt.show()

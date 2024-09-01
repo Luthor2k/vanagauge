@@ -2,7 +2,7 @@
 Description=shutsdown on pin 17 going low
 
 [Service]
-ExecStart=/home/arthur/shutdowner/safe_shutdown_interrupt_Pi.py
+ExecStart=/home/arthur/vanagauge/shutdownService.py
 
 [Install]
 WantedBy=default.target

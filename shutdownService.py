@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 shutdown_pin = 17
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(shutdown_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(shutdown_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def shut_down():
     print("shutting down")
