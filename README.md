@@ -23,6 +23,13 @@ The lastest version of Raspbian is using Wayland instead of X. To hide the curso
 
 https://raspberrypi.stackexchange.com/questions/145382/remove-hide-mouse-cursor-when-idle-on-rasbperry-pi-os-bookworm
 
+Custom spash screens:
+
+sudo cp splash.png /usr/share/plymouth/themes/pix/splash.png
+
+sudo plymouth-set-default-theme --rebuild-initrd pix
+
+
 BOM:
 
 Tech Edge 2Y2 Wideband O2 and DAC module
