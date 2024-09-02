@@ -47,6 +47,14 @@ import time
   28 - CRC (1's comp. sum of above) 
 '''  
 
+K_Type_Thermocouple_Table = [0, 76,  151, 229, 304, 378, 452, 524, 597, 670, 744, 819, 896, 974, 1054, 1136, 1220]
+
+##DAQ_Temp_Table = [161, 98, 75, 61, 51, 44, 37, 31, 25, 19, 14, 8, 2, -5, -14, -27, -63]
+
+DAQ_Temp_Table = [[-40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150],
+    [993.61 , 982.87 , 968.96 , 951.19 , 928.93 , 901.58 , 868.70 , 830.14 , 785.91 , 736.63 , 683.28 , 626.95 , 569.19 , 511.50 , 455.40 , 402.04 , 352.41 , 306.98 , 266.18 , 229.98 , 198.28 , 170.56 , 146.65 , 126.08 , 108.44 , 93.38 , 80.51 , 69.52 , 60.15 , 52.16 , 45.33 , 39.47 , 34.45 , 30.14 , 26.44 , 23.25 , 20.49 , 18.11 , 16.03]]
+
+
 class SerialReaderProtocolLine(LineReader):
     TERMINATOR = b'\x5a\xa5' #tech edge
 
@@ -126,20 +134,55 @@ def init(ser):
 def getReadings(protocol):
     return protocol.DAQRawThermocouple2
 
+
+def readThermistor(protocol):
+    rawADC = protocol.DAQRawOnboardThermistor
+    if rawADC == None:
+        rawADC = 20
+
+    #find the entry
+    lookup_index = 1
+    lower_bound = DAQ_Temp_Table[1][lookup_index]
+
+    while lower_bound > rawADC:
+        lookup_index += 1
+        lower_bound = DAQ_Temp_Table[1][lookup_index]
+
+    upper_bound = DAQ_Temp_Table[1][lookup_index - 1]
+
+    #interpolate
+    interpolatedADC = ((rawADC - lower_bound) / (upper_bound - lower_bound)) * 5
+
+    offset = DAQ_Temp_Table[0][lookup_index-1]
+
+    NTCreading = interpolatedADC + offset
+
+    return NTCreading
+
 def readTC(protocol, channel): #channel, reference table
+    K_Type_Thermocouple_Table = [0, 76,  151, 229, 304, 378, 452, 524, 597, 670, 744, 819, 896, 974, 1054, 1136, 1220]
+
     match channel:
         case 1:
-            rawADC = protocol.DAQRawThermocouple1
+            count = protocol.DAQRawThermocouple1
         case 2:
-            rawADC = protocol.DAQRawThermocouple2
+            count = protocol.DAQRawThermocouple2
         case 3:
-            rawADC = protocol.DAQRawThermocouple3
-    if rawADC == None:
-        rawADC = 0
-    scaledADC = rawADC / 50
+            count = protocol.DAQRawThermocouple3
+    if count == None:
+        count = 0
 
+    seg = int(count / 64)       #round down to find what interval its in
+    counta = seg * 64             #count at the start of that interval
+    offset = count - counta       #offset into the selected interval
+    tempa = K_Type_Thermocouple_Table[seg]      #temperature at the interval start
+    tempb = K_Type_Thermocouple_Table[seg + 1]  #and at the end of the interval
+    m = (tempb - tempa) / 64      #slope of count vs. temperature
+    temp = (m * offset) + tempa   #straight line interpolation y = mx + c
+    cjc = readThermistor(protocol)
+    corrected = temp + cjc
     
-    return scaledADC
+    return corrected
 
 def readADC(protocol, channel): #returns zero to five volts as a float
     match channel:
@@ -154,14 +197,34 @@ def readADC(protocol, channel): #returns zero to five volts as a float
     scaledADC = rawADC / 1638.4
     return scaledADC
 
-def readLambda():
-    return
-def readThermistor():
-    return
-def readRPM():
-    return
+def readLambda(protocol):
+    #widebandLambda greater than 1 means a lean running condition, there is considerably more range for a very lean condition than a rich on here:
+    rawLambda = protocol.DAQRawLambda16
+    if rawLambda == None :
+        rawLambda = 0
+    if rawLambda < 36864:
+       widebandLambda = ( rawLambda / 8192 ) + 0.5
+    else:
+       widebandLambda = 5.0 + ((rawLambda - 36864 ) / 128)
+
+    return widebandLambda
+
+
+def readRPM(protocol, ENGINE_PULSES_PER_REV):
+    rawRPM = protocol.DAQRawRPMCount
+    if rawRPM == None :
+        engineRPM = 0
+    elif rawRPM == 0:
+        engineRPM = 0
+    else:
+        engineRPM = int(12000000 / (rawRPM * ENGINE_PULSES_PER_REV))
+    return engineRPM
+
+
 def readStatus():
     return
+
+
 def readCounter():
     return
 
@@ -171,11 +234,13 @@ if __name__ == '__main__':
     #logger.setLevel(logging.INFO)
     #logger.setLevel(logging.DEBUG)
 
-    serial_port = Serial('/dev/ttyUSB0', 19200, timeout=1)
+    serial_port = Serial('/dev/ttyS0', 19200, timeout=1)
     reader = ReaderThread(serial_port, SerialReaderProtocolLine)
     reader.start()
     #Wait until connection is set up and return the transport and protocol instances.
     transport, protocol = reader.connect()
+
+    print(DAQ_Temp_Table)
 
     while True:
         logging.warning("tick")
