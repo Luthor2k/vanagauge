@@ -1,6 +1,7 @@
 Dash gauge for visualizing data from a Tech Edge wideband DAQ.
 
-![desktop test photo](https://github.com/Luthor2k/vanagauge/blob/master/dash-desktop.jpg)
+![desktop test photo](https://github.com/Luthor2k/vanagauge/blob/master/benchtest.jpg)
+![rendering](https://github.com/Luthor2k/vanagauge/blob/master/render.png)
 
 Setup:
 create a venv and install requirements.txt
