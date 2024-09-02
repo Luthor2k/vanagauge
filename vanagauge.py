@@ -8,6 +8,7 @@ import matplotlib.ticker as ticker
 import numpy as np
 import csv
 import time
+import os
 
 import techedge
 
@@ -48,7 +49,8 @@ captures_engineSpeed = []
 start_time = time.time()
 
 dateTimeToday = time.strftime("%d%b%Y%H%M%S")
-csv_name = "./logs/datalog_" + dateTimeToday + ".csv"
+
+csv_name = os.getenv("HOME") + "/vanagauge/logs/datalog_" + dateTimeToday + ".csv"
 csvRow = "ADC1, ADC2, ADC3, TC1, TC2, TC3, lambda, RPM\n"
 with open(csv_name,'a') as logFile:
     logFile.write(csvRow)
@@ -94,7 +96,7 @@ def animate(i, capture_times, captures_ADC1, captures_ADC2, captures_ADC3, captu
     widebandLambda = techedge.readLambda(DAQ)
     engineSpeed = techedge.readRPM(DAQ,1)
 
-    csv_name = "./logs/datalog_" + dateTimeToday + ".csv"
+    csv_name = os.getenv("HOME") + "/vanagauge/logs/datalog_" + dateTimeToday + ".csv"
     csvRow = str(ADC1) + ", " + str(ADC2) + ", " + str(ADC3) + ", " + str(TC1) + ", " + str(TC2) + ", " + str(TC3) + ", " + str(widebandLambda) + ", " + str(engineSpeed) + '\n'
     with open(csv_name,'a') as logFile:
         logFile.write(csvRow)
