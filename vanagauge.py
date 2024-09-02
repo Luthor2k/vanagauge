@@ -12,7 +12,9 @@ import os
 
 import techedge
 
-IAT_Temp_Table = []
+#IAT sensor table, ohms resistance starting at -40degC and up to 140degC
+IAT_Temp_Table = [45313, 26114, 15462, 9397, 5896, 3792, 2500, 1707, 1175, 834, 596, 436, 323, 243, 187, 144, 113, 89, 71]
+#                   -40     -30     -20 -10   0     10    20    30
 
 # Create figure for plotting
 plt.rcParams['toolbar'] = 'None'
@@ -57,28 +59,26 @@ with open(csv_name,'a') as logFile:
 
 def scaleNTC(count, table): #channel, reference table
 
-    seg = int(count / 64)       #round down to find what interval it's in
-    print(f"seg: {seg}")
-    
-    counta = seg * 64             #count at the start of that interval
-    print(f"counta: {counta}")
+    if count == 0 or count == None:
+        count = 4.9
 
-    offset = count - counta       #offset into the selected interval
-    print(f"offset: {offset}")
-    
-    tempa = table[seg]      #temperature at the interval start
-    print(f"tempa: {tempa}")
+    fixedResistor = 1800
+    refVoltage = 5
+    NTCresistance = (count * fixedResistor) / (refVoltage - count)
 
-    tempb = table[seg + 1]  #and at the end of the interval
-    print(f"tempb: {tempb}")
+    index = 0
 
-    m = (tempb - tempa) / 64      #slope of count vs. temperature
-    print(f"m: {m}")
+    while IAT_Temp_Table[index] > NTCresistance:
+        index += 1
 
-    temp = (m * offset) + tempa   #straight line interpolation y = mx + c
-    print(f"temp: {temp}")
-    
-    return temp
+    lowerBound = IAT_Temp_Table[index-1]
+    upperBound = IAT_Temp_Table[index]
+    offset = lowerBound - NTCresistance
+    span = lowerBound - upperBound
+    slope = offset / span
+    correctedTemperature = (10 * slope) + (index * 10) - 50
+
+    return correctedTemperature
 
 # This function is called periodically from FuncAnimation
 def animate(i, capture_times, captures_ADC1, captures_ADC2, captures_ADC3, captures_TC1, captures_TC2, captures_TC3, captures_lambda, captures_engineSpeed):
@@ -87,8 +87,8 @@ def animate(i, capture_times, captures_ADC1, captures_ADC2, captures_ADC3, captu
     ADC1 = techedge.readADC(DAQ, 1) * 20 #adc1: 4.999 = 100%
     #ADC2 = 100 * (techedge.readADC(DAQ, 2) / 4 - 0.125) #adc2: MAP
     ADC2 = techedge.readADC(DAQ, 2) * 0.53 #adc2: MAP
-    ADC3 = (5 - techedge.readADC(DAQ, 3)) * 113.8 - 283
-
+    ADC3 = scaleNTC(techedge.readADC(DAQ, 3), IAT_Temp_Table)
+    
     TC1 = techedge.readTC(DAQ, 1)
     TC2 = techedge.readTC(DAQ, 2)
     TC3 = techedge.readTC(DAQ, 3)
