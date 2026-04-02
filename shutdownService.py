@@ -1,28 +1,47 @@
 #!/usr/bin/env python3
-
-#wait for gpio edge to trigger a safe shutdown
-
+import RPi.GPIO as GPIO
 import time
-import RPi.GPIO as GPIO 
+import subprocess
 
-shutdown_pin = 17
-GPIO.setwarnings(False)
+PIN = 17              # BCM numbering
+LOW_HOLD_S = 0.250    # 250 ms
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(shutdown_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-def shut_down():
-    print("shutting down")
-    command = "/usr/bin/sudo /sbin/shutdown -h now"
-    import subprocess
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    output = process.communicate()[0]
-    print(output)
+try:
+    print(f"Watching GPIO{PIN} with internal pull-up enabled")
+    print(f"Will shut down if held LOW for >= {int(LOW_HOLD_S * 1000)} ms")
 
-while True:
-    channel = GPIO.wait_for_edge(shutdown_pin, GPIO.RISING, bouncetime=200)
+    low_since = None
+    shutdown_requested = False
 
-    if channel is None:
-        print('channel is None')
-    else:
-        print('GPIO.wait_for_edge(shutdown_pin, GPIO.RISING')
-        shut_down()
+    while True:
+        state = GPIO.input(PIN)
+        now = time.monotonic()
+
+        if state == GPIO.LOW:
+            if low_since is None:
+                low_since = now
+
+            if not shutdown_requested and (now - low_since) >= LOW_HOLD_S:
+                shutdown_requested = True
+                print("Shutdown requested")
+
+                # Graceful shutdown via systemd
+                subprocess.run(
+                    ["/usr/bin/systemctl", "poweroff"],
+                    check=False
+                )
+
+                break
+        else:
+            low_since = None
+
+        time.sleep(0.01)
+
+except KeyboardInterrupt:
+    pass
+
+finally:
+    GPIO.cleanup()

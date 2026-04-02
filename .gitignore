@@ -3,3 +3,4 @@ logs/
 tk_tools/
 __pycache__/
 .vscode/
+working/
